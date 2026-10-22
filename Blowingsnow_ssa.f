@@ -57,7 +57,7 @@
 ! You need to set up the meteorology factors at surface layer:
 ! at 10 m: 
          t3d=263.0 ! temperature in Kelvin 
-         RH=90.0 ! relative humidity in %
+         RH=90.0 ! relative humidity wrt ice (in %)
          u10=12.0 ! 10 m wind speed in m/s
 
 
