@@ -81,7 +81,10 @@
 ! heat: latent heat (=2834-2839 J/g from T=0C to -30C)
          heat=2835.*1000.0  !XY: can be improved to allow T-dependent
 ! est: saturated water vapour pressure over water/ice in Pa
-         est=100.*6.112*exp(17.67*(t3d-273.15)/((t3d-273.15)+243.5))
+!        est=100.*6.112*exp(17.67*(t3d-273.15)/((t3d-273.15)+243.5))       ! over liquid 
+! est: saturated water vapour pressure over ice in Pa (Jacobson, 2005, eq. 2.64),
+! consistent with RH wrt ice as in Dery and Yau (1999, 2001)
+         est=100.*6.112*exp(4648.*(1./273.15-1./t3d)-11.64*alog(273.15/t3d)+0.02265*(273.15-t3d))
 ! fcoe and dcoe: coefficients, see pp103 in Rogers and Yau (1989): A Short Course 
 ! in Cloud Physics, Third Edition, Pergamon Press.
          fcoe=2.2E-2
