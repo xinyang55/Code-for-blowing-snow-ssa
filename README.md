@@ -8,6 +8,9 @@ Please cite (always resolves to the latest version):
 Xin Yang. Code for blowing-snow SSA production. Zenodo. https://doi.org/10.5281/zenodo.17735152
 
 ## Versions
+- v1.2.0 (2026): DOI to be added
+  Saturation vapour pressure (est) now calculated over ice (Jacobson, 2005, eq. 2.64),
+  consistent with RH wrt ice in Dery and Yau (1999, 2001). RH input must be relative to ice as used in the model.
 - v1.1.0 (2026): https://doi.org/10.5281/zenodo.23559494
   Corrects the unit conversion on line 141 (/100 -> /1000; 1 mm/day SWE = 1/86400 kg/m²/s).
   v1.0.0 overestimated the sublimation and SSA fluxes by a factor of 10.
