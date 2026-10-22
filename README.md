@@ -4,6 +4,7 @@ Fortran code for blowing-snow sea salt aerosol (SSA) production only (no bromine
 
 ## Citation
 Please cite (always resolves to the latest version):
+
 Xin Yang. Code for blowing-snow SSA production. Zenodo. https://doi.org/10.5281/zenodo.17735152
 
 ## Versions
