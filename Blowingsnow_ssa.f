@@ -138,7 +138,7 @@
          if (qsx.lt.0) qf=0.  ! force a negative value to zero
 
 ! convert above sublimation flux to kg/m^2/s  
-         qf=qsx/24.0/60.0/60.0/10.0/100.*1E4 
+         qf=qsx/24.0/60.0/60.0/10.0/1000.*1E4 
 
           print *, 'BS sublimation flux:'
           print *, '  mm/day,    kg/m^2/s'
