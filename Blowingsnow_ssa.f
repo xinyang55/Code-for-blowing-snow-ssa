@@ -21,10 +21,15 @@
 ! PANGAEA, https://doi.org/10.1594/PANGAEA.935934. 
 !  
 ! Xin Yang: 25/11/2025
+!
+! An optional extra small snow-particle bin covering 0.3-0.5 um (centred at 0.4 um)
+! is added (switch iextra), as used in the p-TOMCAT SIP (secondary ice production,
+! ice-chip) work. It adds many Aitken-mode SSA but a negligible share of the mass.
+! Xin Yang: 23/10/2026
 ! 
-      integer mich, ish
+      integer mich, ish, iextra, lk0
       real fcoe 
-      real drynacl(1000,24), flux(1000,24) ! array to hold ssa size and flux
+      real drynacl(0:1000,24), flux(0:1000,24) ! array to hold ssa size and flux (index 0 = extra bin)
       real dryr(21), dryrup(21), dryrlow(21) ! dry radius of SSA, upper and lower size
       real fssa(21), fssa_m(21)  ! final SSA production flux in bins for number (particles/m^2/s) and mass (kg/m^2/s)
       real fa(24) ! Snow salinity distribution frequency (in fraction), corresponding to sa(24) 
@@ -53,6 +58,19 @@
           print *, 'Wrong choice for ish (ish=1 for NH and =2 for SH), model stopped!' 
           stop
         endif 
+
+! Choose whether to add an extra small snow-particle bin (as in the SIP work):
+! iextra=0: snow particle diameters 1-1000 um in 1-um bins (smallest bin covers 0.5-1.5 um)
+! iextra=1: plus one extra bin centred at 0.4 um, 0.2 um wide (i.e. 0.3-0.5 um), the size
+!           range of the smallest ice chips in the bottom-up (chip) scheme. It joins the
+!           0.5-1.5 um bin without gap or overlap and is included in the normalisation (sumd).
+        iextra=1 ! or =0
+        if (iextra.ne.0.and.iextra.ne.1) then
+          print *, 'Wrong choice for iextra (0 or 1), model stopped!' 
+          stop
+        endif 
+        d_extra=0.4   ! centre diameter of the extra bin (um)
+        dw_extra=0.2  ! width of the extra bin (um)
 
 ! You need to set up the meteorology factors at surface layer:
 ! at 10 m: 
@@ -266,6 +284,15 @@ gambin(19)=3.7170 ! alfa=3.6
          ddx=1.0
 ! total BS bin number 
          mk=int(req/ddx) 
+! first snow bin: lk=0 is the extra 0.3-0.5 um bin (if iextra=1)
+         lk0=1
+         if (iextra.eq.1) then
+            if (d_extra-0.5*dw_extra.le.0.0.or.d_extra+0.5*dw_extra.gt.0.5*ddx+1.0e-6) then
+               print *, 'Extra bin must lie inside (0, ddx/2], model stopped!', d_extra, dw_extra
+               stop
+            endif
+            lk0=0
+         endif
        
        alfa=11.58*exp(-0.426*u10)+1.911    ! alfa always > 1.911
        beta=37.97*alog(0.38*u10)   
@@ -298,34 +325,46 @@ gambin(19)=3.7170 ! alfa=3.6
 
             sumd=0.0
 
-         do lk=1,mk
-             dd=lk*ddx  ! size of BS particles
+         do lk=lk0,mk
+             if (lk.eq.0) then  ! extra small bin
+                dd=d_extra
+                dwid=dw_extra
+             else
+                dd=lk*ddx  ! size of BS particles
+                dwid=ddx   ! bin width
+             endif
 ! mechanism =1 or =2
              if (mich .eq. 1) then ! dm/dt is constant 
                dmdt=1. 
-               sumd=sumd+dmdt*ddx*dd**(alfa-1)*exp(-1*dd/beta)/(beta**alfa)/gam
+               sumd=sumd+dmdt*dwid*dd**(alfa-1)*exp(-1*dd/beta)/(beta**alfa)/gam
              else ! mich=2, dm/dt is proportional to r
                dmdt=dd
-               sumd=sumd+dmdt*ddx*dd**(alfa-1)*exp(-1*dd/beta)/(beta**alfa)/gam
+               sumd=sumd+dmdt*dwid*dd**(alfa-1)*exp(-1*dd/beta)/(beta**alfa)/gam
              endif
          enddo
 ! ---- end of 1st loop for blowing snow size bins ---
 
 
 ! --- Re-loop for blowing snow size bins ---
-         do lk=1,mk
+         do lk=lk0,mk
 
-             dd=lk*ddx  ! diameter in micrometer (=1E-4 cm, or =1E-6 m)
+             if (lk.eq.0) then  ! extra small bin
+                dd=d_extra
+                dwid=dw_extra
+             else
+                dd=lk*ddx  ! diameter in micrometer (=1E-4 cm, or =1E-6 m)
+                dwid=ddx   ! bin width
+             endif
 ! get water mass (in kg) of each BS particle
                 wmass=4.0/3.0*PI*(dd/2.0)**3*1E-12*denice/1000.0
 ! now get the normalised size distribution "df" for later BS sublimation flux allocation
 
              if (mich.eq.1) then ! dm/dt is constant
                 dmdt=1.
-                df=dmdt*ddx*dd**(alfa-1)*exp(-1*dd/beta)/(beta**alfa)/gam/sumd
+                df=dmdt*dwid*dd**(alfa-1)*exp(-1*dd/beta)/(beta**alfa)/gam/sumd
              else ! =2, dm/dt is proportional to r
                 dmdt=dd
-                df=dmdt*ddx*dd**(alfa-1+1)*exp(-1*dd/beta)/(beta**alfa)/gam/sumd
+                df=dmdt*dwid*dd**(alfa-1+1)*exp(-1*dd/beta)/(beta**alfa)/gam/sumd
              endif
 
 ! ---- then loop snow salinity bins ----
@@ -341,7 +380,7 @@ gambin(19)=3.7170 ! alfa=3.6
             enddo
 ! --- end of loop snow salinity ---
 
-         enddo  ! end of do lk=1,mk
+         enddo  ! end of do lk=lk0,mk
 ! --- end of Re-loop for blowing snow size bins ---
  
 ! Set 21 dry SSA bins (in radius from 0.01 to 10 um) for grouping (bin size can be manualluy changed if needed)
@@ -369,12 +408,12 @@ gambin(19)=3.7170 ! alfa=3.6
              fssa(j)=0.0 ! initiate
              fssa_m(j)=0.0 
          enddo   
-        print *, 'SSA ID, Diameter (µm), Lower D(µm), Upper D(µm), Nu-flux(particles/m^2/s), Mass-flux(kg/m^2/s)'
+        print *, 'SSA ID, Diameter (¬µm), Lower D(¬µm), Upper D(¬µm), Nu-flux(particles/m^2/s), Mass-flux(kg/m^2/s)'
 
 ! --- loop SSA size bins  ---
          do j=1,21 ! dry SSA size bin
 ! --- loop blowing snow particle bins ---
-            do lk =1,  mk
+            do lk =lk0,  mk
 ! --- loop snow salinity bins ----
                do iii=1,24
                     if (drynacl(lk,iii).ge.dryrlow(j).and.drynacl(lk,iii).lt.dryrup(j)) then 
