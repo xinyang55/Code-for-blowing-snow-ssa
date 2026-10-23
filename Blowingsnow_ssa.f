@@ -26,6 +26,10 @@
 ! is added (switch iextra), as used in the p-TOMCAT SIP (secondary ice production,
 ! ice-chip) work. It adds many Aitken-mode SSA but a negligible share of the mass.
 ! Xin Yang: 23/10/2026
+!
+! Bug fix: no blowing-snow SSA when the wind is below the threshold (gave Inf/NaN
+! before), and negative sublimation fluxes are now set to zero as intended.
+! Xin Yang: 23/10/2026
 ! 
       integer mich, ish, iextra, lk0
       real fcoe 
@@ -155,8 +159,12 @@
          qs1=qa5*thi*u10+qa6*thi**2*u10
          qs2=qa7*u10**2.0+qa8*thi*u10**2.0+qa9*u10**3.0
 ! qsx: sublimation flux in mm/day 
-         qsx=(qs0+qs1+qs2)/qnormal
-         if (qsx.lt.0) qf=0.  ! force a negative value to zero
+         if (qnormal.gt.0.0) then
+            qsx=(qs0+qs1+qs2)/qnormal
+         else
+            qsx=0.0   ! wind below threshold: no blowing snow, no SSA production
+         endif
+         if (qsx.lt.0.0) qsx=0.0  ! force a negative value to zero
 
 ! convert above sublimation flux to kg/m^2/s  
          qf=qsx/24.0/60.0/60.0/10.0/1000.*1E4 
