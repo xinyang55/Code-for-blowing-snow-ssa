@@ -3,13 +3,16 @@
 Fortran code for blowing-snow sea salt aerosol (SSA) production only (no bromine).
 
 ## Citation
-Please cite (always resolves to the latest version):
+Please cite the version you used (each release has its own DOI, listed under "Versions" below), e.g.:
 
-Xin Yang. Code for blowing-snow SSA production. Zenodo. https://doi.org/10.5281/zenodo.17735152
+Xin Yang. Code for blowing-snow SSA production (Blowing-snow-SSA v1.3.1). Zenodo. https://doi.org/10.5281/zenodo.23592516
+
+To refer to the code in general, use the concept DOI, which always resolves to the latest version:
+https://doi.org/10.5281/zenodo.17735152
 
 ## Versions
-- v1.3.1 (2026): DOI to be added
-- v1.3.0 (2026): DOI, https://doi.org/10.5281/zenodo.23592206 (superseded).
+- v1.3.1 (2026): https://doi.org/10.5281/zenodo.23592516
+- v1.3.0 (2026): https://doi.org/10.5281/zenodo.23592206 (superseded).
   Optional extra snow-particle bin covering 0.3-0.5 um (centred at 0.4 um), as used in the SIP
   (ice-chip) work; switch iextra (1 = on, default; 0 = off). Adds Aitken-mode SSA
   (total SSA number x1.5-1.7 at 12 m/s) with a negligible change in SSA mass.
