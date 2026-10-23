@@ -408,8 +408,8 @@ gambin(19)=3.7170 ! alfa=3.6
              fssa(j)=0.0 ! initiate
              fssa_m(j)=0.0 
          enddo   
-        print *, 'SSA ID, Diameter (¬µm), Lower D(¬µm), Upper D(¬µm), Nu-flux(particles/m^2/s), Mass-flux(kg/m^2/s)'
-
+         print *, 'SSA ID, Diameter (um), Lower D(um), Upper D(um), Nu-flux(particles/m^2/s), Mass-flux(kg/m^2/s)'
+        
 ! --- loop SSA size bins  ---
          do j=1,21 ! dry SSA size bin
 ! --- loop blowing snow particle bins ---
